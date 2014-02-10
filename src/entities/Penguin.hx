@@ -26,7 +26,7 @@ class Penguin extends Entity
 	public override function update()
 	{
 		if (Input.mousePressed) {
-			moveBy(0, -12);
+			moveBy(0, -30);
 		}
 		gravity();
 	}
