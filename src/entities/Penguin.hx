@@ -1,33 +1,39 @@
 package entities;
 
 import com.haxepunk.Entity;
-import com.haxepunk.graphics.Image;
+import com.haxepunk.graphics.Spritemap;
+import com.haxepunk.Sfx;
 import com.haxepunk.utils.Input;
 
 class Penguin extends Entity
 {
+    private var penguin:Spritemap;
+    private var blow:Sfx;
+
 	public function new(x:Int, y:Int)
 	{
 		super(x, y);
-		graphic = new Image("graphics/penguin.png");
-        // graphic.add("idle", [0], 6);
-        // graphic.add("walk", [7,1,2,3,5,6], 10);
+		penguin = new Spritemap("graphics/penguinsprite.png", 500, 500);
+        penguin.add("idle", [0], 6);
+        penguin.add("blowing", [0, 1, 2, 3], 3, false);
+        penguin.add("blown", [3], 12);
+        penguin.play("idle");
+        blow = new Sfx("audio/blam.wav");
+		graphic = penguin;
 	}
 
-	private function gravity() 
+	private function blowUp() 
 	{
-		if (y < 320)
-		{
-			moveBy(0, 1);
-		}
-
+		penguin.play("blowing");
+		trace(penguin.complete);
+		blow.play();
 	}
 
 	public override function update()
 	{
-		if (Input.mousePressed) {
-			moveBy(0, -20);
+		if (Input.mouseReleased) {
+			blowUp();
 		}
-		gravity();
+		super.update();
 	}
 }

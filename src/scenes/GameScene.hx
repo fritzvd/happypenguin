@@ -12,6 +12,6 @@ class GameScene extends Scene
 
 	public override function begin()
 	{
-		add(new Penguin(200, 50));
+		add(new Penguin(50, 0));
 	}
 }
