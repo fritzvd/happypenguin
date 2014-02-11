@@ -6,19 +6,27 @@ import com.haxepunk.utils.Input;
 
 class Penguin extends Entity
 {
+	private var speed:Int;
+	private var acceleration:Float;
+
 	public function new(x:Int, y:Int)
 	{
 		super(x, y);
 		graphic = new Image("graphics/penguin.png");
-        // graphic.add("idle", [0], 6);
-        // graphic.add("walk", [7,1,2,3,5,6], 10);
+		speed = -1;
+		acceleration = 1;
 	}
 
 	private function gravity() 
 	{
 		if (y < 320)
 		{
-			moveBy(0, 1);
+			moveBy(0, speed * acceleration);
+		}
+		if (acceleration > 1){
+			acceleration -= 1;		
+		} else if (acceleration < 1){
+			acceleration += 1;
 		}
 
 	}
@@ -26,8 +34,12 @@ class Penguin extends Entity
 	public override function update()
 	{
 		if (Input.mousePressed) {
-			moveBy(0, -20);
+			acceleration -= 5;
+		}
+		if (Input.mouseReleased) {
+			acceleration += 5;
 		}
 		gravity();
+		super.update();
 	}
 }
