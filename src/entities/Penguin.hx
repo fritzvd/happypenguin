@@ -9,6 +9,7 @@ class Penguin extends Entity
 {
     private var penguin:Spritemap;
     private var blow:Sfx;
+    private var state:String;
 
 	public function new(x:Int, y:Int)
 	{
@@ -20,19 +21,27 @@ class Penguin extends Entity
         penguin.play("idle");
         blow = new Sfx("audio/blam.wav");
 		graphic = penguin;
+		state = "alive";
 	}
 
 	private function blowUp() 
 	{
 		penguin.play("blowing");
-		trace(penguin.complete);
 		blow.play();
+		state = "dead";
 	}
 
 	public override function update()
 	{
 		if (Input.mouseReleased) {
-			blowUp();
+			if (state == "alive")
+			{
+				blowUp();			
+			} else
+			{
+				state = "alive";
+				penguin.play("idle");
+			}
 		}
 		super.update();
 	}
