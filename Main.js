@@ -56,6 +56,9 @@ ApplicationMain.main = function() {
 	var loader10 = new flash.display.Loader();
 	ApplicationMain.loaders.set("graphics/penguinsprite.png",loader10);
 	ApplicationMain.total++;
+	var loader11 = new flash.display.Loader();
+	ApplicationMain.loaders.set("graphics/bg.png",loader11);
+	ApplicationMain.total++;
 	var resourcePrefix = "__ASSET__:bitmap_";
 	var _g = 0, _g1 = haxe.Resource.listNames();
 	while(_g < _g1.length) {
@@ -73,9 +76,9 @@ ApplicationMain.main = function() {
 		var $it0 = ApplicationMain.loaders.keys();
 		while( $it0.hasNext() ) {
 			var path = $it0.next();
-			var loader11 = ApplicationMain.loaders.get(path);
-			loader11.contentLoaderInfo.addEventListener("complete",ApplicationMain.loader_onComplete);
-			loader11.load(new flash.net.URLRequest(path));
+			var loader12 = ApplicationMain.loaders.get(path);
+			loader12.contentLoaderInfo.addEventListener("complete",ApplicationMain.loader_onComplete);
+			loader12.load(new flash.net.URLRequest(path));
 		}
 		var $it1 = ApplicationMain.urlLoaders.keys();
 		while( $it1.hasNext() ) {
@@ -1576,6 +1579,9 @@ var DefaultAssetLibrary = function() {
 	DefaultAssetLibrary.path.set("graphics/penguinsprite.png","graphics/penguinsprite.png");
 	var value = Reflect.field(openfl.AssetType,"image".toUpperCase());
 	DefaultAssetLibrary.type.set("graphics/penguinsprite.png",value);
+	DefaultAssetLibrary.path.set("graphics/bg.png","graphics/bg.png");
+	var value = Reflect.field(openfl.AssetType,"image".toUpperCase());
+	DefaultAssetLibrary.type.set("graphics/bg.png",value);
 	DefaultAssetLibrary.path.set("audio/blam.wav","audio/blam.wav");
 	var value = Reflect.field(openfl.AssetType,"sound".toUpperCase());
 	DefaultAssetLibrary.type.set("audio/blam.wav",value);
@@ -11001,19 +11007,25 @@ entities.Penguin = function(x,y) {
 	this.penguin.play("idle");
 	this.blow = new com.haxepunk.Sfx("audio/blam.wav");
 	this.set_graphic(this.penguin);
+	this.state = "alive";
 };
 $hxClasses["entities.Penguin"] = entities.Penguin;
 entities.Penguin.__name__ = ["entities","Penguin"];
 entities.Penguin.__super__ = com.haxepunk.Entity;
 entities.Penguin.prototype = $extend(com.haxepunk.Entity.prototype,{
 	update: function() {
-		if(com.haxepunk.utils.Input.mouseReleased) this.blowUp();
+		if(com.haxepunk.utils.Input.mouseReleased) {
+			if(this.state == "alive") this.blowUp(); else {
+				this.state = "alive";
+				this.penguin.play("idle");
+			}
+		}
 		com.haxepunk.Entity.prototype.update.call(this);
 	}
 	,blowUp: function() {
 		this.penguin.play("blowing");
-		haxe.Log.trace(this.penguin.complete,{ fileName : "Penguin.hx", lineNumber : 28, className : "entities.Penguin", methodName : "blowUp"});
 		this.blow.play();
+		this.state = "dead";
 	}
 	,__class__: entities.Penguin
 });
