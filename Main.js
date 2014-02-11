@@ -54,7 +54,7 @@ ApplicationMain.main = function() {
 	ApplicationMain.loaders.set("graphics/penguin.png",loader9);
 	ApplicationMain.total++;
 	var loader10 = new flash.display.Loader();
-	ApplicationMain.loaders.set("graphics/penguinsprite.png",loader10);
+	ApplicationMain.loaders.set("graphics/bgtile.png",loader10);
 	ApplicationMain.total++;
 	var loader11 = new flash.display.Loader();
 	ApplicationMain.loaders.set("graphics/bg.png",loader11);
@@ -1576,15 +1576,12 @@ var DefaultAssetLibrary = function() {
 	DefaultAssetLibrary.path.set("graphics/penguin.png","graphics/penguin.png");
 	var value = Reflect.field(openfl.AssetType,"image".toUpperCase());
 	DefaultAssetLibrary.type.set("graphics/penguin.png",value);
-	DefaultAssetLibrary.path.set("graphics/penguinsprite.png","graphics/penguinsprite.png");
+	DefaultAssetLibrary.path.set("graphics/bgtile.png","graphics/bgtile.png");
 	var value = Reflect.field(openfl.AssetType,"image".toUpperCase());
-	DefaultAssetLibrary.type.set("graphics/penguinsprite.png",value);
+	DefaultAssetLibrary.type.set("graphics/bgtile.png",value);
 	DefaultAssetLibrary.path.set("graphics/bg.png","graphics/bg.png");
 	var value = Reflect.field(openfl.AssetType,"image".toUpperCase());
 	DefaultAssetLibrary.type.set("graphics/bg.png",value);
-	DefaultAssetLibrary.path.set("audio/blam.wav","audio/blam.wav");
-	var value = Reflect.field(openfl.AssetType,"sound".toUpperCase());
-	DefaultAssetLibrary.type.set("audio/blam.wav",value);
 	DefaultAssetLibrary.className.set("font/04B_03__.ttf",__ASSET__font_5);
 	var value = Reflect.field(openfl.AssetType,"font".toUpperCase());
 	DefaultAssetLibrary.type.set("font/04B_03__.ttf",value);
@@ -6784,191 +6781,6 @@ com.haxepunk.Screen.prototype = {
 	,__class__: com.haxepunk.Screen
 	,__properties__: {set_color:"set_color",get_color:"get_color",set_x:"set_x",set_y:"set_y",set_originX:"set_originX",set_originY:"set_originY",set_scaleX:"set_scaleX",set_scaleY:"set_scaleY",set_scale:"set_scale",set_angle:"set_angle",get_angle:"get_angle",set_smoothing:"set_smoothing",get_smoothing:"get_smoothing",get_mouseX:"get_mouseX",get_mouseY:"get_mouseY"}
 }
-com.haxepunk.Sfx = function(source,complete) {
-	this._position = 0;
-	this._pan = 0;
-	this._volume = 1;
-	this._transform = new flash.media.SoundTransform();
-	this._volume = 1;
-	this._pan = 0;
-	this._position = 0;
-	this._type = "";
-	if(source == null) throw "Invalid source Sound.";
-	if(js.Boot.__instanceof(source,String)) {
-		this._sound = openfl.Assets.getSound(source);
-		var key = source;
-		com.haxepunk.Sfx._sounds.set(key,this._sound);
-	} else {
-		var className = Type.getClassName(Type.getClass(source));
-		this._sound = com.haxepunk.Sfx._sounds.get(className);
-		if(this._sound == null) {
-			this._sound = source;
-			var value = source;
-			com.haxepunk.Sfx._sounds.set(className,value);
-		}
-	}
-	this.complete = complete;
-};
-$hxClasses["com.haxepunk.Sfx"] = com.haxepunk.Sfx;
-com.haxepunk.Sfx.__name__ = ["com","haxepunk","Sfx"];
-com.haxepunk.Sfx.getPan = function(type) {
-	if(com.haxepunk.Sfx._typeTransforms.exists(type)) {
-		var transform = com.haxepunk.Sfx._typeTransforms.get(type);
-		return transform != null?transform.pan:0;
-	}
-	return 0;
-}
-com.haxepunk.Sfx.getVolume = function(type) {
-	if(com.haxepunk.Sfx._typeTransforms.exists(type)) {
-		var transform = com.haxepunk.Sfx._typeTransforms.get(type);
-		return transform != null?transform.volume:1;
-	}
-	return 1;
-}
-com.haxepunk.Sfx.setPan = function(type,pan) {
-	var transform = com.haxepunk.Sfx._typeTransforms.get(type);
-	if(transform == null) {
-		transform = new flash.media.SoundTransform();
-		com.haxepunk.Sfx._typeTransforms.set(type,transform);
-	}
-	transform.pan = com.haxepunk.HXP.clamp(pan,-1,1);
-	if(com.haxepunk.Sfx._typePlaying.exists(type)) {
-		var _g = 0, _g1 = com.haxepunk.Sfx._typePlaying.get(type);
-		while(_g < _g1.length) {
-			var sfx = _g1[_g];
-			++_g;
-			sfx.set_pan(sfx.get_pan());
-		}
-	}
-}
-com.haxepunk.Sfx.setVolume = function(type,volume) {
-	var transform = com.haxepunk.Sfx._typeTransforms.get(type);
-	if(transform == null) {
-		transform = new flash.media.SoundTransform();
-		com.haxepunk.Sfx._typeTransforms.set(type,transform);
-	}
-	transform.volume = volume < 0?0:volume;
-	if(com.haxepunk.Sfx._typePlaying.exists(type)) {
-		var _g = 0, _g1 = com.haxepunk.Sfx._typePlaying.get(type);
-		while(_g < _g1.length) {
-			var sfx = _g1[_g];
-			++_g;
-			sfx.set_volume(sfx.get_volume());
-		}
-	}
-}
-com.haxepunk.Sfx.prototype = {
-	get_length: function() {
-		return this._sound.length / 1000;
-	}
-	,get_position: function() {
-		return (this._channel != null?this._channel.position:this._position) / 1000;
-	}
-	,get_playing: function() {
-		return this._channel != null;
-	}
-	,set_type: function(value) {
-		if(this._type == value) return value;
-		if(this._channel != null) {
-			this.removePlaying();
-			this._type = value;
-			this.addPlaying();
-			this.set_pan(this.get_pan());
-			this.set_volume(this.get_volume());
-		} else this._type = value;
-		return value;
-	}
-	,get_type: function() {
-		return this._type;
-	}
-	,set_pan: function(value) {
-		value = com.haxepunk.HXP.clamp(value,-1,1);
-		if(this._channel == null || this._pan == value) return value;
-		var filteredPan = com.haxepunk.HXP.clamp(value + com.haxepunk.Sfx.getPan(this._type),-1,1);
-		if(this._filteredPan == filteredPan) return value;
-		this._pan = value;
-		this._filteredPan = this._transform.pan = filteredPan;
-		this._channel.set_soundTransform(this._transform);
-		return this._pan;
-	}
-	,get_pan: function() {
-		return this._pan;
-	}
-	,set_volume: function(value) {
-		if(value < 0) value = 0;
-		if(this._channel == null || this._volume == value) return value;
-		this._volume = value;
-		var filteredVol = value * com.haxepunk.Sfx.getVolume(this._type);
-		if(filteredVol < 0) filteredVol = 0;
-		if(this._filteredVol == filteredVol) return value;
-		this._filteredVol = this._transform.volume = filteredVol;
-		this._channel.set_soundTransform(this._transform);
-		return this._volume;
-	}
-	,get_volume: function() {
-		return this._volume;
-	}
-	,removePlaying: function() {
-		if(com.haxepunk.Sfx._typePlaying.exists(this._type)) HxOverrides.remove(com.haxepunk.Sfx._typePlaying.get(this._type),this);
-	}
-	,addPlaying: function() {
-		var list;
-		if(!com.haxepunk.Sfx._typePlaying.exists(this._type)) {
-			list = new Array();
-			com.haxepunk.Sfx._typePlaying.set(this._type,list);
-		} else list = com.haxepunk.Sfx._typePlaying.get(this._type);
-		list.push(this);
-	}
-	,onComplete: function(e) {
-		if(this._looping) this.loop(this._volume,this._pan); else this.stop();
-		this._position = 0;
-		if(this.complete != null) this.complete();
-	}
-	,resume: function() {
-		this._channel = this._sound.play(this._position,this._looping?-1:0,this._transform);
-		if(this._channel != null) {
-			this.addPlaying();
-			this._channel.addEventListener(flash.events.Event.SOUND_COMPLETE,$bind(this,this.onComplete));
-		}
-		this._position = 0;
-	}
-	,stop: function() {
-		if(!(this._channel != null)) return false;
-		this.removePlaying();
-		this._position = this._channel.position;
-		this._channel.removeEventListener(flash.events.Event.SOUND_COMPLETE,$bind(this,this.onComplete));
-		this._channel.stop();
-		this._channel = null;
-		return true;
-	}
-	,loop: function(vol,pan) {
-		if(pan == null) pan = 0;
-		if(vol == null) vol = 1;
-		this.play(vol,pan,true);
-	}
-	,play: function(volume,pan,loop) {
-		if(loop == null) loop = false;
-		if(pan == null) pan = 0;
-		if(volume == null) volume = 1;
-		if(this._sound == null) return;
-		if(this._channel != null) this.stop();
-		this._pan = com.haxepunk.HXP.clamp(pan,-1,1);
-		this._volume = volume < 0?0:volume;
-		this._filteredPan = com.haxepunk.HXP.clamp(this._pan + com.haxepunk.Sfx.getPan(this._type),-1,1);
-		this._filteredVol = Math.max(0,this._volume * com.haxepunk.Sfx.getVolume(this._type));
-		this._transform.pan = this._filteredPan;
-		this._transform.volume = this._filteredVol;
-		this._channel = this._sound.play(0,loop?-1:0,this._transform);
-		if(this._channel != null) {
-			this.addPlaying();
-			this._channel.addEventListener(flash.events.Event.SOUND_COMPLETE,$bind(this,this.onComplete));
-		}
-		this._looping = loop;
-		this._position = 0;
-	}
-	,__class__: com.haxepunk.Sfx
-	,__properties__: {set_volume:"set_volume",get_volume:"get_volume",set_pan:"set_pan",get_pan:"get_pan",set_type:"set_type",get_type:"get_type",get_playing:"get_playing",get_position:"get_position",get_length:"get_length"}
-}
 com.haxepunk.TweenType = $hxClasses["com.haxepunk.TweenType"] = { __ename__ : true, __constructs__ : ["Persist","Looping","OneShot"] }
 com.haxepunk.TweenType.Persist = ["Persist",0];
 com.haxepunk.TweenType.Persist.toString = $estr;
@@ -7780,29 +7592,6 @@ com.haxepunk.debug.LayerList.prototype = $extend(flash.display.Sprite.prototype,
 	,__class__: com.haxepunk.debug.LayerList
 });
 com.haxepunk.graphics = {}
-com.haxepunk.graphics.Animation = function(name,frames,frameRate,loop) {
-	if(loop == null) loop = true;
-	if(frameRate == null) frameRate = 0;
-	this.name = name;
-	this.frames = frames;
-	this.frameRate = frameRate;
-	this.loop = loop;
-	this.frameCount = frames.length;
-};
-$hxClasses["com.haxepunk.graphics.Animation"] = com.haxepunk.graphics.Animation;
-com.haxepunk.graphics.Animation.__name__ = ["com","haxepunk","graphics","Animation"];
-com.haxepunk.graphics.Animation.prototype = {
-	set_parent: function(value) {
-		this._parent = value;
-		return this._parent;
-	}
-	,play: function(reset) {
-		if(reset == null) reset = false;
-		this._parent.play(this.name,reset);
-	}
-	,__class__: com.haxepunk.graphics.Animation
-	,__properties__: {set_parent:"set_parent"}
-}
 com.haxepunk.graphics.Graphiclist = function(graphic) {
 	this._graphics = new Array();
 	this._temp = new Array();
@@ -8195,182 +7984,6 @@ com.haxepunk.graphics.Image.prototype = $extend(com.haxepunk.Graphic.prototype,{
 	}
 	,__class__: com.haxepunk.graphics.Image
 	,__properties__: $extend(com.haxepunk.Graphic.prototype.__properties__,{set_scale:"set_scale",get_scale:"get_scale",set_alpha:"set_alpha",get_alpha:"get_alpha",set_color:"set_color",get_color:"get_color",set_flipped:"set_flipped",get_flipped:"get_flipped",get_width:"get_width",get_height:"get_height",set_scaledWidth:"set_scaledWidth",get_scaledWidth:"get_scaledWidth",set_scaledHeight:"set_scaledHeight",get_scaledHeight:"get_scaledHeight",get_clipRect:"get_clipRect"})
-});
-com.haxepunk.graphics.Spritemap = function(source,frameWidth,frameHeight,cbFunc,name) {
-	if(name == null) name = "";
-	if(frameHeight == null) frameHeight = 0;
-	if(frameWidth == null) frameWidth = 0;
-	this.complete = true;
-	this.rate = 1;
-	this._anims = new haxe.ds.StringMap();
-	this._timer = this._frame = 0;
-	this._rect = new flash.geom.Rectangle(0,0,frameWidth,frameHeight);
-	if(js.Boot.__instanceof(source,com.haxepunk.graphics.atlas.TileAtlas)) {
-		this.blit = false;
-		this._atlas = js.Boot.__cast(source , com.haxepunk.graphics.atlas.TileAtlas);
-		this._region = this._atlas.getRegion(this._frame);
-	} else if(com.haxepunk.HXP.renderMode == com.haxepunk.RenderMode.HARDWARE) {
-		this.blit = false;
-		this._atlas = new com.haxepunk.graphics.atlas.TileAtlas(source,frameWidth,frameHeight);
-		this._region = this._atlas.getRegion(this._frame);
-	}
-	com.haxepunk.graphics.Image.call(this,source,this._rect,name);
-	if(this.blit) {
-		this._width = this._source.get_width();
-		this._height = this._source.get_height();
-	} else {
-		this._width = this._atlas.get_width() | 0;
-		this._height = this._atlas.get_height() | 0;
-	}
-	if(frameWidth == 0) this._rect.width = this._width;
-	if(frameHeight == 0) this._rect.height = this._height;
-	if(this._width % this._rect.width != 0 || this._height % this._rect.height != 0) throw "Source image width and height should be multiples of the frame width and height.";
-	this._columns = Math.ceil(this._width / this._rect.width);
-	this._rows = Math.ceil(this._height / this._rect.height);
-	this._frameCount = this._columns * this._rows;
-	this.callbackFunc = cbFunc;
-	this.updateBuffer();
-	this.active = true;
-};
-$hxClasses["com.haxepunk.graphics.Spritemap"] = com.haxepunk.graphics.Spritemap;
-com.haxepunk.graphics.Spritemap.__name__ = ["com","haxepunk","graphics","Spritemap"];
-com.haxepunk.graphics.Spritemap.__super__ = com.haxepunk.graphics.Image;
-com.haxepunk.graphics.Spritemap.prototype = $extend(com.haxepunk.graphics.Image.prototype,{
-	get_currentAnim: function() {
-		return this._anim != null?this._anim.name:"";
-	}
-	,get_rows: function() {
-		return this._rows;
-	}
-	,get_columns: function() {
-		return this._columns;
-	}
-	,get_frameCount: function() {
-		return this._frameCount;
-	}
-	,set_index: function(value) {
-		if(this._anim == null) return 0;
-		value %= this._anim.frameCount;
-		if(this._index == value) return this._index;
-		this._index = value;
-		this._frame = this._anim.frames[this._index];
-		this.updateBuffer();
-		return this._index;
-	}
-	,get_index: function() {
-		return this._anim != null?this._index:0;
-	}
-	,set_frame: function(value) {
-		this._anim = null;
-		value %= this._frameCount;
-		if(value < 0) value = this._frameCount + value;
-		if(this._frame == value) return this._frame;
-		this._frame = value;
-		this.updateBuffer();
-		return this._frame;
-	}
-	,get_frame: function() {
-		return this._frame;
-	}
-	,setAnimFrame: function(name,index) {
-		var frames = this._anims.get(name).frames;
-		index = index % frames.length;
-		if(index < 0) index += frames.length;
-		this.set_frame(frames[index]);
-	}
-	,randFrame: function() {
-		this.set_frame((function($this) {
-			var $r;
-			com.haxepunk.HXP._seed = com.haxepunk.HXP._seed * 16807.0 % 2147483646 | 0;
-			$r = com.haxepunk.HXP._seed / 2147483646 * $this._frameCount | 0;
-			return $r;
-		}(this)));
-	}
-	,setFrame: function(column,row) {
-		if(row == null) row = 0;
-		if(column == null) column = 0;
-		this._anim = null;
-		var frame = row % this._rows * this._columns + column % this._columns;
-		if(this._frame == frame) return;
-		this._frame = frame;
-		this.updateBuffer();
-	}
-	,getFrame: function(column,row) {
-		if(row == null) row = 0;
-		if(column == null) column = 0;
-		return row % this._rows * this._columns + column % this._columns;
-	}
-	,play: function(name,reset) {
-		if(reset == null) reset = false;
-		if(name == null) name = "";
-		if(!reset && this._anim != null && this._anim.name == name) return this._anim;
-		if(this._anims.exists(name)) {
-			this._anim = this._anims.get(name);
-			this._timer = this._index = 0;
-			this._frame = this._anim.frames[0];
-			this.complete = false;
-		} else {
-			this._anim = null;
-			this._frame = this._index = 0;
-			this.complete = true;
-		}
-		this.updateBuffer();
-		return this._anim;
-	}
-	,add: function(name,frames,frameRate,loop) {
-		if(loop == null) loop = true;
-		if(frameRate == null) frameRate = 0;
-		if(this._anims.get(name) != null) throw "Cannot have multiple animations with the same name";
-		if(frameRate == 0) frameRate = com.haxepunk.HXP.assignedFrameRate;
-		var _g1 = 0, _g = frames.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			frames[i] %= this._frameCount;
-			if(frames[i] < 0) frames[i] += this._frameCount;
-		}
-		var anim = new com.haxepunk.graphics.Animation(name,frames,frameRate,loop);
-		this._anims.set(name,anim);
-		anim.set_parent(this);
-		return anim;
-	}
-	,update: function() {
-		if(this._anim != null && !this.complete) {
-			this._timer += (com.haxepunk.HXP.fixed?this._anim.frameRate / com.haxepunk.HXP.assignedFrameRate:this._anim.frameRate * com.haxepunk.HXP.elapsed) * this.rate;
-			if(this._timer >= 1) {
-				while(this._timer >= 1) {
-					this._timer--;
-					this._index++;
-					if(this._index == this._anim.frameCount) {
-						if(this._anim.loop) {
-							this._index = 0;
-							if(this.callbackFunc != null) this.callbackFunc();
-						} else {
-							this._index = this._anim.frameCount - 1;
-							this.complete = true;
-							if(this.callbackFunc != null) this.callbackFunc();
-							break;
-						}
-					}
-				}
-				if(this._anim != null) this._frame = this._anim.frames[this._index] | 0;
-				this.updateBuffer();
-			}
-		}
-	}
-	,updateBuffer: function(clearBefore) {
-		if(clearBefore == null) clearBefore = false;
-		if(this.blit) {
-			if(this._width > 0 && this._height > 0) {
-				this._rect.x = this._rect.width * this._frame;
-				this._rect.y = (this._rect.x / this._width | 0) * this._rect.height;
-				this._rect.x = this._rect.x % this._width;
-				if(this._flipped) this._rect.x = this._width - this._rect.width - this._rect.x;
-			}
-			com.haxepunk.graphics.Image.prototype.updateBuffer.call(this,clearBefore);
-		} else this._region = this._atlas.getRegion(this._frame);
-	}
-	,__class__: com.haxepunk.graphics.Spritemap
-	,__properties__: $extend(com.haxepunk.graphics.Image.prototype.__properties__,{set_frame:"set_frame",get_frame:"get_frame",set_index:"set_index",get_index:"get_index",get_frameCount:"get_frameCount",get_columns:"get_columns",get_rows:"get_rows",get_currentAnim:"get_currentAnim"})
 });
 com.haxepunk.graphics.Text = function(text,x,y,width,height,options) {
 	if(height == null) height = 0;
@@ -8783,40 +8396,6 @@ com.haxepunk.graphics.atlas.TextureAtlas.prototype = $extend(com.haxepunk.graphi
 		throw "Region has not be defined yet: " + name;
 	}
 	,__class__: com.haxepunk.graphics.atlas.TextureAtlas
-});
-com.haxepunk.graphics.atlas.TileAtlas = function(source,tileWidth,tileHeight,tileMarginWidth,tileMarginHeight) {
-	if(tileMarginHeight == null) tileMarginHeight = 0;
-	if(tileMarginWidth == null) tileMarginWidth = 0;
-	com.haxepunk.graphics.atlas.Atlas.call(this,source);
-	this._regions = new Array();
-	this.prepareTiles(this._data.width,this._data.height,tileWidth,tileHeight,tileMarginWidth,tileMarginHeight);
-};
-$hxClasses["com.haxepunk.graphics.atlas.TileAtlas"] = com.haxepunk.graphics.atlas.TileAtlas;
-com.haxepunk.graphics.atlas.TileAtlas.__name__ = ["com","haxepunk","graphics","atlas","TileAtlas"];
-com.haxepunk.graphics.atlas.TileAtlas.__super__ = com.haxepunk.graphics.atlas.Atlas;
-com.haxepunk.graphics.atlas.TileAtlas.prototype = $extend(com.haxepunk.graphics.atlas.Atlas.prototype,{
-	prepareTiles: function(width,height,tileWidth,tileHeight,tileMarginWidth,tileMarginHeight) {
-		var cols = Math.floor(width / tileWidth);
-		var rows = Math.floor(height / tileHeight);
-		com.haxepunk.HXP.rect.width = tileWidth;
-		com.haxepunk.HXP.rect.height = tileHeight;
-		com.haxepunk.HXP.point.x = com.haxepunk.HXP.point.y = 0;
-		var _g = 0;
-		while(_g < rows) {
-			var y = _g++;
-			com.haxepunk.HXP.rect.y = y * (tileHeight + tileMarginHeight);
-			var _g1 = 0;
-			while(_g1 < cols) {
-				var x = _g1++;
-				com.haxepunk.HXP.rect.x = x * (tileWidth + tileMarginWidth);
-				this._regions.push(this._data.createRegion(com.haxepunk.HXP.rect,com.haxepunk.HXP.point));
-			}
-		}
-	}
-	,getRegion: function(index) {
-		return this._regions[index];
-	}
-	,__class__: com.haxepunk.graphics.atlas.TileAtlas
 });
 com.haxepunk.masks = {}
 com.haxepunk.masks.Hitbox = function(width,height,x,y) {
@@ -11000,32 +10579,23 @@ com.haxepunk.utils.Touch.prototype = {
 var entities = {}
 entities.Penguin = function(x,y) {
 	com.haxepunk.Entity.call(this,x,y);
-	this.penguin = new com.haxepunk.graphics.Spritemap("graphics/penguinsprite.png",500,500);
-	this.penguin.add("idle",[0],6);
-	this.penguin.add("blowing",[0,1,2,3],3,false);
-	this.penguin.add("blown",[3],12);
-	this.penguin.play("idle");
-	this.blow = new com.haxepunk.Sfx("audio/blam.wav");
-	this.set_graphic(this.penguin);
-	this.state = "alive";
+	this.set_graphic(new com.haxepunk.graphics.Image("graphics/penguin.png"));
+	this.speed = 1;
+	this.acceleration = 1;
 };
 $hxClasses["entities.Penguin"] = entities.Penguin;
 entities.Penguin.__name__ = ["entities","Penguin"];
 entities.Penguin.__super__ = com.haxepunk.Entity;
 entities.Penguin.prototype = $extend(com.haxepunk.Entity.prototype,{
 	update: function() {
-		if(com.haxepunk.utils.Input.mouseReleased) {
-			if(this.state == "alive") this.blowUp(); else {
-				this.state = "alive";
-				this.penguin.play("idle");
-			}
-		}
+		if(com.haxepunk.utils.Input.mousePressed) this.acceleration = 0;
+		if(com.haxepunk.utils.Input.mouseReleased) this.acceleration -= 10;
+		this.gravity();
 		com.haxepunk.Entity.prototype.update.call(this);
 	}
-	,blowUp: function() {
-		this.penguin.play("blowing");
-		this.blow.play();
-		this.state = "dead";
+	,gravity: function() {
+		if((this.followCamera?this.y + com.haxepunk.HXP.camera.y:this.y) < 320) this.moveBy(0,this.speed * this.acceleration);
+		if(this.acceleration > 1) this.acceleration -= 1; else if(this.acceleration < 1) this.acceleration += 1;
 	}
 	,__class__: entities.Penguin
 });
@@ -15881,7 +15451,14 @@ scenes.GameScene.__name__ = ["scenes","GameScene"];
 scenes.GameScene.__super__ = com.haxepunk.Scene;
 scenes.GameScene.prototype = $extend(com.haxepunk.Scene.prototype,{
 	begin: function() {
-		this.add(new entities.Penguin(50,0));
+		var bitmap = new com.haxepunk.graphics.Image("graphics/bg.png");
+		bitmap.x = -bitmap.get_width() / 2;
+		bitmap.y = -bitmap.get_height() / 2;
+		var bgEntity = new com.haxepunk.Entity(0,0,bitmap);
+		bgEntity.x = bitmap.get_width() / 2;
+		bgEntity.y = bitmap.get_height() / 2;
+		this.add(bgEntity);
+		this.add(new entities.Penguin(200,50));
 	}
 	,__class__: scenes.GameScene
 });
@@ -16066,9 +15643,6 @@ com.haxepunk.HXP.zero = new flash.geom.Point();
 com.haxepunk.HXP.rect = new flash.geom.Rectangle();
 com.haxepunk.HXP.matrix = new flash.geom.Matrix();
 com.haxepunk.HXP.sprite = new flash.display.Sprite();
-com.haxepunk.Sfx._sounds = new haxe.ds.StringMap();
-com.haxepunk.Sfx._typePlaying = new haxe.ds.StringMap();
-com.haxepunk.Sfx._typeTransforms = new haxe.ds.StringMap();
 com.haxepunk.debug.Console.BIG_WIDTH_THRESHOLD = 420;
 com.haxepunk.graphics.Image._flips = new haxe.ds.StringMap();
 com.haxepunk.graphics.atlas.Atlas.smooth = false;
