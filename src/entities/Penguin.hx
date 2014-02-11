@@ -13,7 +13,7 @@ class Penguin extends Entity
 	{
 		super(x, y);
 		graphic = new Image("graphics/penguin.png");
-		speed = -1;
+		speed = 1;
 		acceleration = 1;
 	}
 
@@ -34,10 +34,10 @@ class Penguin extends Entity
 	public override function update()
 	{
 		if (Input.mousePressed) {
-			acceleration -= 5;
+			acceleration = 0;
 		}
 		if (Input.mouseReleased) {
-			acceleration += 5;
+			acceleration -= 10;
 		}
 		gravity();
 		super.update();
