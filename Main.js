@@ -59,6 +59,9 @@ ApplicationMain.main = function() {
 	var loader11 = new flash.display.Loader();
 	ApplicationMain.loaders.set("graphics/bg.png",loader11);
 	ApplicationMain.total++;
+	var loader12 = new flash.display.Loader();
+	ApplicationMain.loaders.set("graphics/bgsky.png",loader12);
+	ApplicationMain.total++;
 	var resourcePrefix = "__ASSET__:bitmap_";
 	var _g = 0, _g1 = haxe.Resource.listNames();
 	while(_g < _g1.length) {
@@ -76,9 +79,9 @@ ApplicationMain.main = function() {
 		var $it0 = ApplicationMain.loaders.keys();
 		while( $it0.hasNext() ) {
 			var path = $it0.next();
-			var loader12 = ApplicationMain.loaders.get(path);
-			loader12.contentLoaderInfo.addEventListener("complete",ApplicationMain.loader_onComplete);
-			loader12.load(new flash.net.URLRequest(path));
+			var loader13 = ApplicationMain.loaders.get(path);
+			loader13.contentLoaderInfo.addEventListener("complete",ApplicationMain.loader_onComplete);
+			loader13.load(new flash.net.URLRequest(path));
 		}
 		var $it1 = ApplicationMain.urlLoaders.keys();
 		while( $it1.hasNext() ) {
@@ -1582,6 +1585,9 @@ var DefaultAssetLibrary = function() {
 	DefaultAssetLibrary.path.set("graphics/bg.png","graphics/bg.png");
 	var value = Reflect.field(openfl.AssetType,"image".toUpperCase());
 	DefaultAssetLibrary.type.set("graphics/bg.png",value);
+	DefaultAssetLibrary.path.set("graphics/bgsky.png","graphics/bgsky.png");
+	var value = Reflect.field(openfl.AssetType,"image".toUpperCase());
+	DefaultAssetLibrary.type.set("graphics/bgsky.png",value);
 	DefaultAssetLibrary.className.set("font/04B_03__.ttf",__ASSET__font_5);
 	var value = Reflect.field(openfl.AssetType,"font".toUpperCase());
 	DefaultAssetLibrary.type.set("font/04B_03__.ttf",value);
@@ -7592,6 +7598,333 @@ com.haxepunk.debug.LayerList.prototype = $extend(flash.display.Sprite.prototype,
 	,__class__: com.haxepunk.debug.LayerList
 });
 com.haxepunk.graphics = {}
+com.haxepunk.graphics.Canvas = function(width,height) {
+	this._maxHeight = 4000;
+	this._maxWidth = 4000;
+	com.haxepunk.Graphic.call(this);
+	this._color = 16777215;
+	this._red = this._green = this._blue = 1;
+	this._alpha = 1;
+	this._graphics = com.haxepunk.HXP.sprite.get_graphics();
+	this._matrix = new flash.geom.Matrix();
+	this._rect = new flash.geom.Rectangle();
+	this._colorTransform = new flash.geom.ColorTransform();
+	this._buffers = new Array();
+	this.angle = 0;
+	this.scale = this.scaleX = this.scaleY = 1;
+	this._width = width;
+	this._height = height;
+	if(com.haxepunk.HXP.renderMode == com.haxepunk.RenderMode.BUFFER) {
+		this._refWidth = Math.ceil(width / this._maxWidth);
+		this._refHeight = Math.ceil(height / this._maxHeight);
+		this._ref = com.haxepunk.HXP.createBitmap(this._refWidth,this._refHeight);
+		var x = 0, y = 0, w, h, i = 0, ww = this._width % this._maxWidth, hh = this._height % this._maxHeight;
+		if(ww == 0) ww = this._maxWidth;
+		if(hh == 0) hh = this._maxHeight;
+		while(y < this._refHeight) {
+			h = y < this._refHeight - 1?this._maxHeight:hh;
+			while(x < this._refWidth) {
+				w = x < this._refWidth - 1?this._maxWidth:ww;
+				this._ref.setPixel(x,y,i);
+				this._buffers[i] = com.haxepunk.HXP.createBitmap(w,h,true);
+				i++;
+				x++;
+			}
+			x = 0;
+			y++;
+		}
+	}
+};
+$hxClasses["com.haxepunk.graphics.Canvas"] = com.haxepunk.graphics.Canvas;
+com.haxepunk.graphics.Canvas.__name__ = ["com","haxepunk","graphics","Canvas"];
+com.haxepunk.graphics.Canvas.__super__ = com.haxepunk.Graphic;
+com.haxepunk.graphics.Canvas.prototype = $extend(com.haxepunk.Graphic.prototype,{
+	get_height: function() {
+		return this._height;
+	}
+	,get_width: function() {
+		return this._width;
+	}
+	,shift: function(x,y) {
+		if(y == null) y = 0;
+		if(x == null) x = 0;
+		this.drawGraphic(x,y,this);
+	}
+	,set_alpha: function(value) {
+		if(value < 0) value = 0;
+		if(value > 1) value = 1;
+		if(this._alpha == value) return this._alpha;
+		this._alpha = value;
+		if(this._alpha == 1 && this._color == 16777215) {
+			this._tint = null;
+			return this._alpha;
+		}
+		this._tint = this._colorTransform;
+		this._tint.redMultiplier = this._red;
+		this._tint.greenMultiplier = this._green;
+		this._tint.blueMultiplier = this._blue;
+		this._tint.alphaMultiplier = this._alpha;
+		return this._alpha;
+	}
+	,get_alpha: function() {
+		return this._alpha;
+	}
+	,set_color: function(value) {
+		value %= 16777215;
+		if(this._color == value) return this._color;
+		this._color = value;
+		this._red = (this.get_color() >> 16 & 255) / 255;
+		this._green = (this.get_color() >> 8 & 255) / 255;
+		this._blue = (this.get_color() & 255) / 255;
+		if(this._alpha == 1 && this._color == 16777215) {
+			this._tint = null;
+			return this._color;
+		}
+		this._tint = this._colorTransform;
+		this._tint.redMultiplier = this._red;
+		this._tint.greenMultiplier = this._green;
+		this._tint.blueMultiplier = this._blue;
+		this._tint.alphaMultiplier = this._alpha;
+		return this._color;
+	}
+	,get_color: function() {
+		return this._color;
+	}
+	,drawGraphic: function(x,y,source) {
+		var xx = 0, yy = 0;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer = _g1[_g];
+			++_g;
+			this._point.x = x - xx;
+			this._point.y = y - yy;
+			source.render(buffer,this._point,com.haxepunk.HXP.zero);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+	}
+	,fillTexture: function(rect,texture) {
+		var xx = 0, yy = 0;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer = _g1[_g];
+			++_g;
+			this._graphics.clear();
+			this._graphics.beginBitmapFill(texture);
+			this._graphics.drawRect(rect.x - xx,rect.y - yy,rect.width,rect.height);
+			buffer.draw(com.haxepunk.HXP.sprite);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+		this._graphics.endFill();
+	}
+	,drawRect: function(rect,color,alpha) {
+		if(alpha == null) alpha = 1;
+		if(color == null) color = 0;
+		var xx = 0, yy = 0, buffer;
+		if(alpha >= 1) {
+			this._rect.width = rect.width;
+			this._rect.height = rect.height;
+			var _g = 0, _g1 = this._buffers;
+			while(_g < _g1.length) {
+				var buffer1 = _g1[_g];
+				++_g;
+				this._rect.x = rect.x - xx;
+				this._rect.y = rect.y - yy;
+				buffer1.fillRect(this._rect,-16777216 | color);
+				xx += this._maxWidth;
+				if(xx >= this._width) {
+					xx = 0;
+					yy += this._maxHeight;
+				}
+			}
+			return;
+		}
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer1 = _g1[_g];
+			++_g;
+			this._graphics.clear();
+			this._graphics.beginFill(color,alpha);
+			this._graphics.drawRect(rect.x - xx,rect.y - yy,rect.width,rect.height);
+			buffer1.draw(com.haxepunk.HXP.sprite);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+		this._graphics.endFill();
+	}
+	,fill: function(rect,color,alpha) {
+		if(alpha == null) alpha = 1;
+		if(color == null) color = 0;
+		var xx = 0, yy = 0, buffer;
+		this._rect.width = rect.width;
+		this._rect.height = rect.height;
+		if(alpha >= 1) color |= -16777216; else if(alpha <= 0) color = 0; else color = (alpha * 255 | 0) << 24 | 16777215 & color;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer1 = _g1[_g];
+			++_g;
+			this._rect.x = rect.x - xx;
+			this._rect.y = rect.y - yy;
+			buffer1.fillRect(this._rect,color);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+	}
+	,draw: function(x,y,source,rect) {
+		var xx = 0, yy = 0;
+		var _g = 0, _g1 = this._buffers;
+		while(_g < _g1.length) {
+			var buffer = _g1[_g];
+			++_g;
+			this._point.x = x - xx;
+			this._point.y = y - yy;
+			buffer.copyPixels(source,rect != null?rect:source.rect,this._point,null,null,true);
+			xx += this._maxWidth;
+			if(xx >= this._width) {
+				xx = 0;
+				yy += this._maxHeight;
+			}
+		}
+	}
+	,render: function(target,point,camera) {
+		var sx = this.scale * this.scaleX, sy = this.scale * this.scaleY;
+		this._point.x = point.x + this.x - camera.x * this.scrollX;
+		this._point.y = point.y + this.y - camera.y * this.scrollY;
+		this._rect.x = this._rect.y = 0;
+		this._rect.width = this._maxWidth;
+		this._rect.height = this._maxHeight;
+		var xx = 0, yy = 0, buffer, px = this._point.x;
+		target.lock();
+		while(yy < this._refHeight) {
+			while(xx < this._refWidth) {
+				buffer = this._buffers[this._ref.getPixel(xx,yy)];
+				if(this.angle == 0 && sx == 1 && sy == 1 && this.blend == null && this._tint == null) {
+					this._rect.width = buffer.___textureBuffer != null?buffer.___textureBuffer.width:0;
+					this._rect.height = buffer.___textureBuffer != null?buffer.___textureBuffer.height:0;
+					target.copyPixels(buffer,this._rect,this._point,null,null,true);
+				} else {
+					this._matrix.b = this._matrix.c = 0;
+					this._matrix.a = sx;
+					this._matrix.d = sy;
+					this._matrix.set_tx(this._matrix.set_ty(0));
+					if(this.angle != 0) this._matrix.rotate(this.angle * (Math.PI / -180));
+					var _g = this._matrix;
+					_g.set_tx(_g.tx + this._point.x);
+					var _g = this._matrix;
+					_g.set_ty(_g.ty + this._point.y);
+					target.draw(buffer,this._matrix,this._tint,this.blend);
+				}
+				this._point.x += this._maxWidth;
+				xx++;
+			}
+			this._point.x = px;
+			this._point.y += this._maxHeight;
+			xx = 0;
+			yy++;
+		}
+		target.unlock();
+	}
+	,__class__: com.haxepunk.graphics.Canvas
+	,__properties__: $extend(com.haxepunk.Graphic.prototype.__properties__,{set_color:"set_color",get_color:"get_color",set_alpha:"set_alpha",get_alpha:"get_alpha",get_width:"get_width",get_height:"get_height"})
+});
+com.haxepunk.graphics.Backdrop = function(source,repeatX,repeatY) {
+	if(repeatY == null) repeatY = true;
+	if(repeatX == null) repeatX = true;
+	if(js.Boot.__instanceof(source,com.haxepunk.graphics.atlas.AtlasRegion)) this.setAtlasRegion(source); else if(com.haxepunk.HXP.renderMode == com.haxepunk.RenderMode.HARDWARE) this.setAtlasRegion(com.haxepunk.graphics.atlas.Atlas.loadImageAsRegion(source)); else {
+		if(js.Boot.__instanceof(source,flash.display.BitmapData)) this.setBitmapSource(source); else if(js.Boot.__instanceof(source,Dynamic)) {
+			this.blit = true;
+			this._source = com.haxepunk.HXP.getBitmap(source);
+			this._textWidth = this._source.get_width();
+			this._textHeight = this._source.get_height();
+		}
+		if(this._source == null && this._region == null) {
+			this.blit = true;
+			this._source = com.haxepunk.HXP.createBitmap(com.haxepunk.HXP.width,com.haxepunk.HXP.height,true);
+			this._textWidth = this._source.get_width();
+			this._textHeight = this._source.get_height();
+		}
+	}
+	this._repeatX = repeatX;
+	this._repeatY = repeatY;
+	com.haxepunk.graphics.Canvas.call(this,com.haxepunk.HXP.width * (repeatX?1:0) + this._textWidth,com.haxepunk.HXP.height * (repeatY?1:0) + this._textHeight);
+	if(this.blit) {
+		com.haxepunk.HXP.rect.x = com.haxepunk.HXP.rect.y = 0;
+		com.haxepunk.HXP.rect.width = this._width;
+		com.haxepunk.HXP.rect.height = this._height;
+		this.fillTexture(com.haxepunk.HXP.rect,this._source);
+	}
+};
+$hxClasses["com.haxepunk.graphics.Backdrop"] = com.haxepunk.graphics.Backdrop;
+com.haxepunk.graphics.Backdrop.__name__ = ["com","haxepunk","graphics","Backdrop"];
+com.haxepunk.graphics.Backdrop.__super__ = com.haxepunk.graphics.Canvas;
+com.haxepunk.graphics.Backdrop.prototype = $extend(com.haxepunk.graphics.Canvas.prototype,{
+	renderAtlas: function(layer,point,camera) {
+		this._point.x = point.x + this.x - camera.x * this.scrollX;
+		this._point.y = point.y + this.y - camera.y * this.scrollY;
+		if(this._repeatX) {
+			this._point.x %= this._textWidth;
+			if(this._point.x > 0) this._point.x -= this._textWidth;
+		}
+		if(this._repeatY) {
+			this._point.y %= this._textHeight;
+			if(this._point.y > 0) this._point.y -= this._textHeight;
+		}
+		var sx = com.haxepunk.HXP.screen.fullScaleX, sy = com.haxepunk.HXP.screen.fullScaleY, px = this._point.x * sx, py = this._point.y * sy;
+		var y = 0;
+		while(y < this._height * sy) {
+			var x = 0;
+			while(x < this._width * sx) {
+				this._region.draw(Math.floor(px + x),Math.floor(py + y),layer,sx,sy,0,this._red,this._green,this._blue,this._alpha);
+				x += this._textWidth * sx;
+			}
+			y += this._textHeight * sy;
+		}
+	}
+	,render: function(target,point,camera) {
+		this._point.x = point.x + this.x - camera.x * this.scrollX;
+		this._point.y = point.y + this.y - camera.y * this.scrollY;
+		if(this._repeatX) {
+			this._point.x %= this._textWidth;
+			if(this._point.x > 0) this._point.x -= this._textWidth;
+		}
+		if(this._repeatY) {
+			this._point.y %= this._textHeight;
+			if(this._point.y > 0) this._point.y -= this._textHeight;
+		}
+		this._x = this.x;
+		this._y = this.y;
+		this.x = this.y = 0;
+		com.haxepunk.graphics.Canvas.prototype.render.call(this,target,this._point,com.haxepunk.HXP.zero);
+		this.x = this._x;
+		this.y = this._y;
+	}
+	,setBitmapSource: function(bitmap) {
+		this.blit = true;
+		this._source = bitmap;
+		this._textWidth = this._source.get_width();
+		this._textHeight = this._source.get_height();
+	}
+	,setAtlasRegion: function(region) {
+		this.blit = false;
+		this._region = region;
+		this._textWidth = region.rect.width | 0;
+		this._textHeight = region.rect.height | 0;
+	}
+	,__class__: com.haxepunk.graphics.Backdrop
+});
 com.haxepunk.graphics.Graphiclist = function(graphic) {
 	this._graphics = new Array();
 	this._temp = new Array();
@@ -10582,6 +10915,7 @@ entities.Penguin = function(x,y) {
 	this.set_graphic(new com.haxepunk.graphics.Image("graphics/penguin.png"));
 	this.speed = 1;
 	this.acceleration = 1;
+	this.STATE = "idle";
 };
 $hxClasses["entities.Penguin"] = entities.Penguin;
 entities.Penguin.__name__ = ["entities","Penguin"];
@@ -10594,7 +10928,7 @@ entities.Penguin.prototype = $extend(com.haxepunk.Entity.prototype,{
 		com.haxepunk.Entity.prototype.update.call(this);
 	}
 	,gravity: function() {
-		if((this.followCamera?this.y + com.haxepunk.HXP.camera.y:this.y) < 320) this.moveBy(0,this.speed * this.acceleration);
+		if((this.followCamera?this.y + com.haxepunk.HXP.camera.y:this.y) < 380 && this.STATE != "ground") this.moveBy(0,this.speed * this.acceleration);
 		if(this.acceleration > 1) this.acceleration -= 1; else if(this.acceleration < 1) this.acceleration += 1;
 	}
 	,__class__: entities.Penguin
@@ -15445,20 +15779,30 @@ openfl.display.Tilesheet.prototype = {
 var scenes = {}
 scenes.GameScene = function() {
 	com.haxepunk.Scene.call(this);
+	this.cameraXOffset = com.haxepunk.HXP.width / 2;
+	this.cameraYOffset = com.haxepunk.HXP.height / 2;
 };
 $hxClasses["scenes.GameScene"] = scenes.GameScene;
 scenes.GameScene.__name__ = ["scenes","GameScene"];
 scenes.GameScene.__super__ = com.haxepunk.Scene;
 scenes.GameScene.prototype = $extend(com.haxepunk.Scene.prototype,{
-	begin: function() {
-		var bitmap = new com.haxepunk.graphics.Image("graphics/bg.png");
-		bitmap.x = -bitmap.get_width() / 2;
-		bitmap.y = -bitmap.get_height() / 2;
-		var bgEntity = new com.haxepunk.Entity(0,0,bitmap);
-		bgEntity.x = bitmap.get_width() / 2;
-		bgEntity.y = bitmap.get_height() / 2;
+	update: function() {
+		this.followPlayer();
+		com.haxepunk.Scene.prototype.update.call(this);
+	}
+	,followPlayer: function() {
+		com.haxepunk.HXP.camera.x = this.player.get_x() - this.cameraXOffset;
+		com.haxepunk.HXP.camera.y = this.player.get_y() - this.cameraYOffset;
+	}
+	,begin: function() {
+		var bgGround = new com.haxepunk.graphics.Backdrop("graphics/bg.png",true,false);
+		var bgSnow = new com.haxepunk.graphics.Backdrop("graphics/bgtile.png",true,true);
+		var bgSky = new com.haxepunk.graphics.Backdrop("graphics/bgsky.png",true,true);
+		var bgEntity = new com.haxepunk.Entity(0,0);
+		bgEntity.set_graphic(new com.haxepunk.graphics.Graphiclist([bgSky,bgSnow,bgGround]));
 		this.add(bgEntity);
-		this.add(new entities.Penguin(200,50));
+		this.player = new entities.Penguin(200,50);
+		this.add(this.player);
 	}
 	,__class__: scenes.GameScene
 });
