@@ -21,7 +21,7 @@ class Penguin extends Entity
 
 	private function gravity() 
 	{
-		if (y < 380 ) && (STATE != idle) ) {
+		if (y < 380  && STATE != "ground") {
 			moveBy(0, speed * acceleration);
 		}
 		if (acceleration > 1){
