@@ -3,12 +3,15 @@ package entities;
 import com.haxepunk.Entity;
 import com.haxepunk.graphics.Image;
 import com.haxepunk.utils.Input;
+#if mobile
+import com.haxepunk.utils.Touch;
+#end
 
 class Penguin extends Entity
 {
 	private var speed:Int;
 	private var acceleration:Float;
-	public var STATE:String;
+	public var state:String;
 
 	public function new(x:Int, y:Int)
 	{
@@ -16,29 +19,34 @@ class Penguin extends Entity
 		graphic = new Image("graphics/penguin.png");
 		speed = 1;
 		acceleration = 1;
-		STATE = "idle";
+		state = "falling";
 	}
 
 	private function gravity() 
 	{
-		if (y < 380  && STATE != "ground") {
+		if (state != "ground") {
 			moveBy(0, speed * acceleration);
 		}
-		if (acceleration > 1){
-			acceleration -= 1;		
-		} else if (acceleration < 1){
-			acceleration += 1;
+		if (state == "falling" && acceleration < 3){
+			acceleration += 1;		
 		}
-
 	}
 
 	public override function update()
 	{
 		if (Input.mousePressed) {
-			acceleration = 0;
-		}
-		if (Input.mouseReleased) {
+			acceleration = -1;
+			state = "floating";
+		} else
+		 if (Input.mouseReleased) {
 			acceleration -= 10;
+			state = "flying";
+		} else {
+			if (y > 380) {
+				state = "ground";
+			} else {
+				state = "falling";
+			}
 		}
 		gravity();
 		super.update();
