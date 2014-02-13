@@ -3,6 +3,8 @@ package scenes;
 import com.haxepunk.HXP;
 import com.haxepunk.Scene;
 import com.haxepunk.graphics.Image;
+import com.haxepunk.graphics.Backdrop;
+import com.haxepunk.graphics.Graphiclist;
 import com.haxepunk.Entity;
 import entities.Penguin;
 
@@ -23,12 +25,11 @@ class GameScene extends Scene
 	public override function begin()
 	{
 
-		var bitmap:Image = new Image("graphics/bg.png");
-        bitmap.x = - bitmap.width / 2;
-        bitmap.y = - bitmap.height / 2;
-        var bgEntity:Entity = new Entity(0,0,bitmap);
-        bgEntity.x =  (bitmap.width/2);
-        bgEntity.y =  (bitmap.height/2);
+        var bgGround:Backdrop = new Backdrop("graphics/bg.png", true, false);
+        var bgSnow:Backdrop = new Backdrop("graphics/bgtile.png", true, true);
+        var bgSky:Backdrop = new Backdrop("graphics/bgsky.png", true, true);
+        var bgEntity:Entity = new Entity(0, 0);
+        bgEntity.graphic = new Graphiclist([bgSky, bgSnow, bgGround]);
         add(bgEntity);
 
         player = new Penguin(200, 50);

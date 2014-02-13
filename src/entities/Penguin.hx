@@ -8,6 +8,7 @@ class Penguin extends Entity
 {
 	private var speed:Int;
 	private var acceleration:Float;
+	public var STATE:String;
 
 	public function new(x:Int, y:Int)
 	{
@@ -15,12 +16,12 @@ class Penguin extends Entity
 		graphic = new Image("graphics/penguin.png");
 		speed = 1;
 		acceleration = 1;
+		STATE = "idle";
 	}
 
 	private function gravity() 
 	{
-		if (y < 320)
-		{
+		if (y < 380 ) && (STATE != idle) ) {
 			moveBy(0, speed * acceleration);
 		}
 		if (acceleration > 1){
