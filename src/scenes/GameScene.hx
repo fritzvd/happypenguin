@@ -28,10 +28,13 @@ class GameScene extends Scene
         var bgGround:Backdrop = new Backdrop("graphics/bg.png", true, false);
         var bgSnow:Backdrop = new Backdrop("graphics/bgtile.png", true, true);
         bgSnow.scrollY = 0.3;
+        var bgSnow2:Backdrop = new Backdrop("graphics/bgsnow2.png", true, true);
+        bgSnow2.scale = 0.4;
+        bgSnow2.scrollY = 0.8;
         var bgSky:Backdrop = new Backdrop("graphics/bgsky.png", true, true);
-        bgSnow.scrollY = 0.9;
+        bgSky.scrollY = 0.9;
         var bgEntity:Entity = new Entity(0, 0);
-        bgEntity.graphic = new Graphiclist([bgSky, bgSnow, bgGround]);
+        bgEntity.graphic = new Graphiclist([bgSky, bgSnow, bgSnow2, bgGround]);
         add(bgEntity);
 
         player = new Penguin(200, 50);

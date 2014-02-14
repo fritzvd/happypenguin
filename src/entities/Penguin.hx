@@ -22,6 +22,18 @@ class Penguin extends Entity
 		state = "falling";
 	}
 
+	#if mobile
+    private function handleTouch(touch:com.haxepunk.utils.Touch) 
+    {
+        
+        if (touch.pressed){
+        	trace(touch);
+            acceleration = -1;
+			state = "floating";
+        }
+    }
+    #end
+
 	private function gravity() 
 	{
 		if (state != "ground") {
@@ -34,6 +46,10 @@ class Penguin extends Entity
 
 	public override function update()
 	{
+
+		#if mobile
+        Input.touchPoints(handleTouch);
+        #end
 		if (Input.mousePressed) {
 			acceleration = -1;
 			state = "floating";
@@ -48,6 +64,8 @@ class Penguin extends Entity
 				state = "falling";
 			}
 		}
+
+		
 		gravity();
 		super.update();
 	}
