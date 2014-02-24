@@ -20,6 +20,7 @@ class Penguin extends Entity
 		speed = 1;
 		acceleration = 1;
 		state = "falling";
+		setHitbox(50, 50);
 	}
 
 	#if mobile

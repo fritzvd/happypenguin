@@ -7,6 +7,7 @@ import com.haxepunk.graphics.Backdrop;
 import com.haxepunk.graphics.Graphiclist;
 import com.haxepunk.Entity;
 import entities.Penguin;
+import entities.Enemy;
 
 class GameScene extends Scene
 {
@@ -48,8 +49,13 @@ class GameScene extends Scene
 		HXP.camera.y = player.y - cameraYOffset;
 	}
 
+	private function spawnEnemy() {
+		// trace(player.y % 50);
+	}
+
 	public override function update()
 	{
+		spawnEnemy();
 		followPlayer();
 		super.update();
 	}
