@@ -1,9 +1,9 @@
 package entities;
 
 import com.haxepunk.Entity;
-import com.haxepunk.Image;
+import com.haxepunk.graphics.Image;
 
-public class Enemy extends Entity 
+class Enemy extends Entity 
 {
 	public override function new(x:Int, y:Int)
 	{
